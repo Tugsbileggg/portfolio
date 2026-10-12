@@ -1,4 +1,5 @@
-// Zero-dependency static server: `node serve.js` → http://localhost:5173
+// Local dev server: `npm run dev` → http://localhost:5173
+// Static files plus /api/chat (reads GEMINI_API_KEY from .env if present).
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,6 +23,9 @@ const types = {
 http
   .createServer((req, res) => {
     const url = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    if (url === '/api/chat') {
+      return import('./api/chat.js').then((m) => m.default(req, res)).catch((e) => { console.error(e); res.writeHead(500).end(); });
+    }
     let file = path.normalize(path.join(root, url));
     if (!file.startsWith(root)) return res.writeHead(403).end();
     if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');

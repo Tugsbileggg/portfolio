@@ -3,6 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node serve.js"
+    "dev": "node --env-file-if-exists=.env serve.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.28.0"
   }
 }

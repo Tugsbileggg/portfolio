@@ -34,6 +34,24 @@ export const site = {
     title: ["Let's build", 'something', 'together.'],
   },
 
+  // Булангийн жижиг уул — AI туслах. Зөвхөн энэ файл дахь мэдээлэл дээр тулгуурлаж хариулна.
+  assistant: {
+    name: 'Uuli',
+    greetings: ['Сайн уу! Танд юугаар туслах вэ?', 'Hi! How can I help you?'],
+    suggestions: [
+      'What does Tugsbileg build?',
+      'Is Tugsbileg open to work?',
+      'Төслүүдийнх нь талаар яриач',
+    ],
+    // Дээр байхгүй нэмэлт мэдээлэл (ур чадвар, сургууль, хэл, ажлын туршлага, хобби...).
+    // Энд бичсэн зүйлийг л AI мэднэ — бичээгүй зүйлийг "мэдэхгүй" гэж хариулна.
+    facts: [
+      'Builds full products end to end: database, API, web and mobile apps.',
+      'Works mostly with TypeScript, Next.js, React Native (Expo), Supabase/PostgreSQL and Firebase.',
+      'Speaks Mongolian and English.',
+    ],
+  },
+
   // Хөрөг зураг. Цайвар/энгийн дэвсгэртэй, нүүр нь сайн гэрэлтэй зураг хамгийн гоё харагдана.
   portrait: {
     src: 'assets/portrait.jpg',

@@ -4,6 +4,7 @@ import { createMountains } from './mountains.js';
 import { createSky, createStars, createClouds, skyColor, skyValue } from './sky.js';
 import { createPath, createPanels, layoutPanels, createTrail } from './journey.js';
 import { createCursorFX } from './cursor.js';
+import { createBuddy } from './buddy.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -298,7 +299,7 @@ async function boot() {
     ? null
     : createCursorFX($('#fx'), { isDay: () => theme.target > 0.5 });
   addEventListener('click', (e) => {
-    if (hovered && hovered.userData.url && hovered.userData.url !== '#' && !e.target.closest('a,button')) {
+    if (hovered && hovered.userData.url && hovered.userData.url !== '#' && !e.target.closest('a,button,.chat')) {
       window.open(hovered.userData.url, '_blank', 'noopener');
     }
   });
@@ -506,4 +507,5 @@ function tickLoader() {
   step();
 }
 
+createBuddy();
 boot();
