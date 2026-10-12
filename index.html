@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portfolio</title>
+  <meta name="description" content="Portfolio — a flight from the mountains into the sky, past the projects I have built." />
+  <meta name="theme-color" content="#03060f" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2303060f'/%3E%3Cpath d='M4 24l8-11 5 6 4-4 7 9z' fill='%239fd0ff'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script>
+    try { document.documentElement.dataset.sky = localStorage.getItem('sky-theme') || 'night'; } catch (e) { document.documentElement.dataset.sky = 'night'; }
+  </script>
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+  </script>
+</head>
+<body class="is-loading">
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <!-- Loader -->
+  <div id="loader">
+    <div class="loader-grid" aria-hidden="true"></div>
+    <div class="loader-brand">
+      <h1 data-name></h1>
+      <p data-role></p>
+    </div>
+    <div class="loader-center">
+      <span class="loader-status">Charting the sky</span>
+      <div class="loader-bar"><i></i></div>
+      <div class="theme-pick" role="group" aria-label="Choose your sky">
+        <button type="button" data-theme-set="night" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg><span>Night</span></button>
+        <button type="button" data-theme-set="day" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></svg><span>Day</span></button>
+      </div>
+      <button class="enter" type="button" disabled>Enter the sky <span aria-hidden="true">↘</span></button>
+    </div>
+    <div class="loader-card" aria-hidden="true">
+      <div class="card-row"><span>Lat</span><b>47.9184° N</b></div>
+      <div class="card-row"><span>Lon</span><b>106.9177° E</b></div>
+      <div class="card-row"><span>Alt</span><b>1,350 M</b></div>
+      <div class="card-big">Made under the<br /><em>eternal blue sky</em></div>
+      <div class="card-ticks"></div>
+    </div>
+    <div class="loader-count" aria-hidden="true">000</div>
+  </div>
+
+  <!-- HUD -->
+  <header class="hud hud-top">
+    <a class="logo" href="#" data-goto="hero" aria-label="Back to start"><span data-initial></span></a>
+    <nav class="nav">
+      <a href="#about" data-goto="about">About</a>
+      <a href="#projects" data-goto="projects">Projects</a>
+      <a href="#contact" data-goto="contact">Contact</a>
+    </nav>
+    <button class="theme-toggle" type="button" aria-label="Switch to day sky"><span class="ico-moon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg></span><span class="ico-sun"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></svg></span></button>
+    <div class="status"><i></i><span>Available</span></div>
+  </header>
+
+  <footer class="hud hud-bottom">
+    <div class="brand"><strong data-name></strong><span data-role></span></div>
+    <div class="instruments" aria-hidden="true">
+      <span>ALT <b id="alt">1,350</b> M</span>
+      <span>HDG <b id="hdg">000</b>°</span>
+      <span id="coords">47.9184°N 106.9177°E</span>
+    </div>
+    <div class="contact">
+      <a data-email></a>
+      <div class="socials" data-socials></div>
+    </div>
+  </footer>
+
+  <aside class="rail" aria-label="Journey">
+    <div class="rail-track"><i class="rail-fill"></i></div>
+    <ol></ol>
+  </aside>
+
+  <p class="scroll-hint"><i aria-hidden="true"></i><span></span></p>
+
+  <!-- Story overlays -->
+  <main id="story">
+    <section class="block block-hero" data-block="hero">
+      <p class="kicker"></p>
+      <h2 class="display"></h2>
+    </section>
+
+    <section class="block block-about" data-block="about" id="about">
+      <p class="kicker"></p>
+      <h2 class="display"></h2>
+      <p class="body"></p>
+      <p class="meta"><span>Based in</span> <b data-location></b></p>
+    </section>
+
+    <section class="block block-work" data-block="work" id="projects">
+      <p class="kicker">Selected work</p>
+      <h2 class="display"><span class="line"><span><span class="count">00</span> projects</span></span></h2>
+      <p class="body">Follow the route. Each stop is something I built.</p>
+    </section>
+
+    <section class="block block-outro" data-block="outro" id="contact">
+      <p class="kicker"></p>
+      <h2 class="display"></h2>
+      <a class="mail" data-email></a>
+      <div class="socials" data-socials></div>
+    </section>
+  </main>
+
+  <template id="project-tpl">
+    <section class="block block-project">
+      <p class="kicker"><span class="idx"></span><span class="year"></span></p>
+      <h2 class="display"></h2>
+      <p class="tagline"></p>
+      <p class="desc"></p>
+      <dl class="facts">
+        <div><dt>Role</dt><dd class="role"></dd></div>
+        <div><dt>Stack</dt><dd class="stack"></dd></div>
+      </dl>
+      <div class="links">
+        <a class="visit" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+        <a class="repo" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+  </template>
+
+  <div id="scroll" aria-hidden="true"></div>
+
+  <!-- Shown only if WebGL is unavailable -->
+  <section id="lite">
+    <h1 data-name></h1>
+    <p data-role></p>
+    <ol id="lite-list"></ol>
+    <a data-email></a>
+  </section>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
