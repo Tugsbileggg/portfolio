@@ -3,8 +3,14 @@
 import { GoogleGenAI, ApiError } from '@google/genai';
 import { site, projects } from '../js/config.js';
 
-// The second model takes over when the first is out of free quota or overloaded.
-const MODELS = ['gemini-3.8-flash', 'gemini-3.5-flash-lite'];
+// Free-tier models are sometimes out of quota (429) or overloaded (503), so each one steps in for
+// the one before it. If all are busy, wait a moment and try the round once more.
+const MODELS = [
+  { id: 'gemini-3.8-flash', thinking: { thinkingLevel: 'LOW' } },
+  { id: 'gemini-3.5-flash-lite', thinking: { thinkingLevel: 'LOW' } },
+  { id: 'gemini-2.5-flash', thinking: { thinkingBudget: 0 } },
+];
+const ATTEMPTS = MODELS.length * 2;
 const MAX_TURNS = 16;
 const MAX_CHARS = 1500;
 
@@ -28,12 +34,14 @@ export default async function handler(req, res) {
   ai ??= new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   const contents = messages.map((m) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
   let started = false;
-  for (const model of MODELS) {
+  for (let i = 0; i < ATTEMPTS; i++) {
+    const model = MODELS[i % MODELS.length];
+    if (i === MODELS.length) await new Promise((r) => setTimeout(r, 1500));
     try {
       const stream = await ai.models.generateContentStream({
-        model,
+        model: model.id,
         contents,
-        config: { systemInstruction: system, maxOutputTokens: 2048, thinkingConfig: { thinkingLevel: 'LOW' } },
+        config: { systemInstruction: system, maxOutputTokens: 2048, thinkingConfig: model.thinking },
       });
       for await (const chunk of stream) {
         const t = chunk.text;
@@ -47,11 +55,10 @@ export default async function handler(req, res) {
       if (!started) return send(res, 200, "Hmm, I can't help with that one. Ask me about Tugsbileg's work instead!");
       return res.end();
     } catch (err) {
-      // 429 = free quota used up, 5xx = model overloaded; either way the next model may still answer
       const quota = err instanceof ApiError && err.status === 429;
       const busy = quota || (err instanceof ApiError && err.status >= 500);
-      if (busy && !started && model !== MODELS[MODELS.length - 1]) continue;
-      console.error('[chat]', model, err);
+      console.error('[chat]', model.id, busy ? `busy (${err.status})` : err);
+      if (busy && !started && i < ATTEMPTS - 1) continue;
       if (started) return res.end('\n\n(connection lost)');
       return send(res, quota ? 429 : 502, quota
         ? "I've talked a lot today and need to catch my breath — please try again later."
