@@ -6,6 +6,7 @@
 
 export const site = {
   name: 'TUGSBILEG',
+  nameMn: 'Төгсбилэг', // AI туслах монголоор ингэж бичнэ
   role: 'Full-stack Developer',
   location: 'Ulaanbaatar, Mongolia',
   email: 'hello@example.com',

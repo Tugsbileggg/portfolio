@@ -3,14 +3,17 @@
 import { GoogleGenAI, ApiError } from '@google/genai';
 import { site, projects } from '../js/config.js';
 
-// Free-tier models are sometimes out of quota (429) or overloaded (503), so each one steps in for
-// the one before it. If all are busy, wait a moment and try the round once more.
+// Free-tier models are sometimes out of quota (429), overloaded (503) or just slow, so each one
+// steps in for the one before it. If all are busy, wait a moment and try the round once more.
+// Answers come from a short profile, so Flash-Lite with minimal thinking is fast and good enough,
+// and it has the most generous free quota.
 const MODELS = [
+  { id: 'gemini-3.5-flash-lite', thinking: { thinkingLevel: 'MINIMAL' } },
   { id: 'gemini-3.8-flash', thinking: { thinkingLevel: 'LOW' } },
-  { id: 'gemini-3.5-flash-lite', thinking: { thinkingLevel: 'LOW' } },
   { id: 'gemini-2.5-flash', thinking: { thinkingBudget: 0 } },
 ];
 const ATTEMPTS = MODELS.length * 2;
+const FIRST_TOKEN_MS = 7000; // give up on a model that hasn't started answering by then
 const MAX_TURNS = 16;
 const MAX_CHARS = 1500;
 
@@ -37,17 +40,22 @@ export default async function handler(req, res) {
   for (let i = 0; i < ATTEMPTS; i++) {
     const model = MODELS[i % MODELS.length];
     if (i === MODELS.length) await new Promise((r) => setTimeout(r, 1500));
+    const t0 = Date.now();
+    const slow = new AbortController();
+    const timer = setTimeout(() => slow.abort(), FIRST_TOKEN_MS);
     try {
       const stream = await ai.models.generateContentStream({
         model: model.id,
         contents,
-        config: { systemInstruction: system, maxOutputTokens: 2048, thinkingConfig: model.thinking },
+        config: { systemInstruction: system, maxOutputTokens: 2048, thinkingConfig: model.thinking, abortSignal: slow.signal },
       });
       for await (const chunk of stream) {
         const t = chunk.text;
         if (!t) continue;
         if (!started) {
           started = true;
+          clearTimeout(timer);
+          console.log('[chat]', model.id, `first token ${Date.now() - t0}ms`);
           res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', 'X-Accel-Buffering': 'no' });
         }
         res.write(t);
@@ -56,13 +64,16 @@ export default async function handler(req, res) {
       return res.end();
     } catch (err) {
       const quota = err instanceof ApiError && err.status === 429;
-      const busy = quota || (err instanceof ApiError && err.status >= 500);
-      console.error('[chat]', model.id, busy ? `busy (${err.status})` : err);
-      if (busy && !started && i < ATTEMPTS - 1) continue;
+      const busy = quota || (err instanceof ApiError && err.status >= 500) || (slow.signal.aborted && !started);
+      console.error('[chat]', model.id, busy ? `busy (${err.status ?? 'slow'}) after ${Date.now() - t0}ms` : err);
+      // any error moves on to the next model; only "busy" errors earn the second round
+      if (!started && i < ATTEMPTS - 1 && (busy || i < MODELS.length - 1)) continue;
       if (started) return res.end('\n\n(connection lost)');
       return send(res, quota ? 429 : 502, quota
         ? "I've talked a lot today and need to catch my breath — please try again later."
         : 'The mountain air is thin right now — please try again in a moment.');
+    } finally {
+      clearTimeout(timer);
     }
   }
 }
@@ -117,10 +128,12 @@ function buildSystem() {
 
 Answer only from the profile below. If a visitor asks something the profile doesn't cover (salary, age, past employers, anything personal), say you don't know and suggest contacting ${first} directly — never guess or invent details. If they ask for something unrelated to ${first} (general coding help, homework, other topics), politely steer back to ${first} and the work.
 
-Reply in the visitor's language — Mongolian (Cyrillic) if they write Mongolian, English if English, and so on. Keep replies short and conversational: usually one to three sentences, plain text, no headings or tables. You may share the links and email from the profile. Refer to ${first} by name rather than with gendered pronouns. A light touch of mountain charm is welcome, but stay helpful first.
+Always write in the language of the visitor's latest message: English gets English, Mongolian gets Mongolian Cyrillic, and so on. In Mongolian, spell the name ${site.nameMn}.
+
+Answer the actual question with real details from the profile. For example, when asked what ${first} has built, name the projects with a few words on each instead of inviting further questions. Keep replies short and conversational: usually one to three sentences, or a short dash list when naming several things. Plain text, no headings, tables or bold. You may share the links and email from the profile. Refer to ${first} by name rather than with gendered pronouns. A light touch of mountain charm is welcome, but stay helpful first.
 
 <profile>
-Name: ${first}
+Name: ${first} (Mongolian: ${site.nameMn})
 Role: ${site.role}
 Based in: ${site.location}
 Open to work: ${site.available ? 'yes' : 'not right now'}
