@@ -3,7 +3,7 @@
 import { GoogleGenAI, ApiError } from '@google/genai';
 import { site, projects } from '../js/config.js';
 
-// The second model takes over when the first one's free daily quota runs out.
+// The second model takes over when the first is out of free quota or overloaded.
 const MODELS = ['gemini-3.8-flash', 'gemini-3.5-flash-lite'];
 const MAX_TURNS = 16;
 const MAX_CHARS = 1500;
@@ -47,8 +47,10 @@ export default async function handler(req, res) {
       if (!started) return send(res, 200, "Hmm, I can't help with that one. Ask me about Tugsbileg's work instead!");
       return res.end();
     } catch (err) {
+      // 429 = free quota used up, 5xx = model overloaded; either way the next model may still answer
       const quota = err instanceof ApiError && err.status === 429;
-      if (quota && !started && model !== MODELS[MODELS.length - 1]) continue;
+      const busy = quota || (err instanceof ApiError && err.status >= 500);
+      if (busy && !started && model !== MODELS[MODELS.length - 1]) continue;
       console.error('[chat]', model, err);
       if (started) return res.end('\n\n(connection lost)');
       return send(res, quota ? 429 : 502, quota
