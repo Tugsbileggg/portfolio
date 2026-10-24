@@ -1,7 +1,6 @@
 // ─────────────────────────────────────────────────────────────
 //  Бүх агуулгыг ЭНДЭЭС засна. (Edit all content here.)
 //  - Зураг: assets/portrait.png (байхгүй бол түр дүрс гарна)
-//  - Нүүрний жижиг зургууд: assets/me/*.jpg
 //  - Төслийн зураг: assets/projects/*.jpg  (image: null бол автоматаар зурна)
 // ─────────────────────────────────────────────────────────────
 
@@ -32,17 +31,6 @@ export const site = {
       'Every project is a climb: start on solid ground, then keep going until the view opens up.',
   },
 
-  // About хэсэгт гарах жижиг зургууд
-  photos: [
-    { src: 'assets/me/steppe.jpg', alt: 'Tugsbileg in the countryside at sunset' },
-    { src: 'assets/me/gaming.jpg', alt: 'Tugsbileg smiling at a gaming tournament' },
-    { src: 'assets/me/ger.jpg', alt: 'Tugsbileg inside a ger' },
-    { src: 'assets/me/office.jpg', alt: 'Tugsbileg with glasses and a cap' },
-    { src: 'assets/me/mirror.jpg', alt: 'Mirror selfie of Tugsbileg' },
-    { src: 'assets/me/waves.jpg', alt: 'Mirror selfie of Tugsbileg with wavy hair' },
-    { src: 'assets/me/barber.jpg', alt: 'Tugsbileg at the barber' },
-  ],
-
   outro: {
     kicker: 'Next destination',
     title: ["Let's build", 'something', 'together.'],
@@ -69,8 +57,8 @@ export const site = {
 
   // Хөрөг зураг. Цайвар/энгийн дэвсгэртэй, нүүр нь сайн гэрэлтэй зураг хамгийн гоё харагдана.
   portrait: {
-    src: 'assets/portrait.png', // цагаан дэвсгэрийг хассан (transparent)
-    contrast: 1.25, // 1 = original
+    src: 'assets/portrait.png', // дэвсгэргүй, зөөлрүүлж тодруулсан хар-цагаан
+    contrast: 1.1, // 1 = original
     depth: 7,       // how tall the "mountain relief" of the face is
   },
 };

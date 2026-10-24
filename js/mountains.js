@@ -189,7 +189,7 @@ const vertex = /* glsl */ `
     mv.xy += dv / (sqrt(md2) + 1e-4) * pf * vDepth * 0.05;
     gl_Position = projectionMatrix * mv;
 
-    float size = uSize * (0.6 + aRand.y * 0.8);
+    float size = uSize * mix(0.6 + aRand.y * 0.8, 0.85 + aRand.y * 0.3, t * isP); // even dots once assembled
     size *= mix(1.0, mix(0.75 + lumN * 0.6, 0.8 + (1.0 - aLum) * 0.5, uDay), t * isP);
     size *= 1.0 + pf * 0.9;
     gl_PointSize = clamp(size * uScale / vDepth, 1.0, 26.0);

@@ -51,11 +51,6 @@ function fillContent() {
   $$('[data-initial]').forEach((el) => (el.textContent = site.name[0]));
   $$('[data-email]').forEach((el) => { el.textContent = site.email; el.href = `mailto:${site.email}`; });
   $$('[data-resume]').forEach((el) => { if (site.resume) el.href = site.resume; else el.remove(); });
-  $$('[data-faces]').forEach((el) => {
-    el.innerHTML = (site.photos || [])
-      .map((p, i) => `<li style="--i:${i}"><img src="${p.src}" alt="${p.alt}" loading="lazy" decoding="async" /></li>`)
-      .join('');
-  });
   $$('[data-location]').forEach((el) => (el.textContent = site.location));
   $$('[data-socials]').forEach((el) => {
     el.innerHTML = site.socials.map((s) => `<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join('');
