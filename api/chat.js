@@ -65,8 +65,7 @@ export default async function handler(req, res) {
       const stream = await ai.models.generateContentStream({
         model: model.id,
         contents,
-        // today's date lets it work out an age from the birthday in the profile
-        config: { systemInstruction: `${systems[lang]}\n\nToday is ${new Date().toISOString().slice(0, 10)}.`, maxOutputTokens: 2048, thinkingConfig: model.thinking, abortSignal: slow.signal },
+        config: { systemInstruction: `${systems[lang]}\n\n${today()}`, maxOutputTokens: 2048, thinkingConfig: model.thinking, abortSignal: slow.signal },
       });
       for await (const chunk of stream) {
         const t = chunk.text;
@@ -93,6 +92,16 @@ export default async function handler(req, res) {
       clearTimeout(timer);
     }
   }
+}
+
+// The age is worked out here, so the model never has to do date maths (Ulaanbaatar time, UTC+8).
+function today() {
+  const now = new Date(Date.now() + 8 * 3600e3);
+  const [y, m, d] = site.born.split('-').map(Number);
+  const month = now.getUTCMonth() + 1;
+  const age = now.getUTCFullYear() - y - (month < m || (month === m && now.getUTCDate() < d) ? 1 : 0);
+  const first = site.name.en[0] + site.name.en.slice(1).toLowerCase();
+  return `Today is ${now.toISOString().slice(0, 10)}, so ${first} is ${age} years old.`;
 }
 
 function send(res, status, text) {
@@ -155,10 +164,11 @@ Answer only from the profile below. If a visitor asks something the profile does
 
 ${language}
 
-Answer the actual question with real details from the profile. For example, when asked what ${first} has built, name the projects with a few words on each instead of inviting further questions. Keep replies short and conversational: usually one to three sentences, or a short dash list when naming several things. Plain text, no headings, tables or bold. You may share the links and email from the profile. Refer to ${first} by name rather than with gendered pronouns. A light touch of mountain charm is welcome, but stay helpful first.
+Answer the actual question with real details from the profile. For example, when asked what ${first} has built, name the projects with a few words on each instead of inviting further questions. Keep replies short and conversational: usually one to three sentences, or a short dash list when naming several things. Plain text, no headings, tables or bold. Always answer in your own words, in full sentences in the reply language; never paste profile lines or their markers as they are. You may share the links and email from the profile. Refer to ${first} by name rather than with gendered pronouns. A light touch of mountain charm is welcome, but stay helpful first.
 
 <profile>
 Name: ${first} (Mongolian: ${nameMn})
+Born: ${site.born} (the current age is given below the profile)
 Role: ${tr(site.role)}
 Based in: ${tr(site.location)}
 Open to work: ${site.available ? 'yes' : 'not right now'}

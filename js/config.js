@@ -10,6 +10,7 @@ export const site = {
   name: { en: 'TUGSBILEG', mn: 'ТӨГСБИЛЭГ' },
   role: { en: 'Full-stack Developer', mn: 'Full-stack хөгжүүлэгч' },
   location: { en: 'Ulaanbaatar, Mongolia', mn: 'Улаанбаатар, Монгол' },
+  born: '2003-11-01', // AI туслах насыг үүнээс тооцно
   email: 'ganbat.tugsbileg@gmail.com',
   resume: 'https://docs.google.com/document/d/1mFcVVozH7vXmo3IJIZWRl1UbnF0bXkWBUwUgIFglab8/edit?usp=sharing',
   available: true,
@@ -60,8 +61,8 @@ export const site = {
     facts: [
       // хувийн
       'Full name: Ganbat Tugsbileg (Ганбат Төгсбилэг). Phone: +976 8556 7784.',
-      'Born on 1 November 2003: a Scorpio, and born in the Year of the Sheep (Хонь жил) by the Mongolian calendar.',
-      'Loves playing football (хөлбөмбөг), the favourite thing to do away from the keyboard.',
+      'Tugsbileg is a Scorpio and was born in the Year of the Sheep (Хонь жил) by the Mongolian calendar.',
+      'Tugsbileg loves playing football; it is the favourite thing to do away from the keyboard.',
       'Languages: Mongolian (native), English (B2), Japanese (N5).',
       // резюмегээс
       'Headline: entry-level full-stack developer, focused on backend and automation.',
