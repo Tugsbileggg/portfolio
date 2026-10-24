@@ -57,7 +57,7 @@ export const site = {
 
   // Хөрөг зураг. Цайвар/энгийн дэвсгэртэй, нүүр нь сайн гэрэлтэй зураг хамгийн гоё харагдана.
   portrait: {
-    src: 'assets/portrait.png', // дэвсгэргүй, бага зэрэг инээмсэглэсэн, хар-цагаан
+    src: 'assets/portrait.png', // дэвсгэргүй хар-цагаан, үсний хүрээг гүйцээсэн
     contrast: 1.1, // 1 = original
     depth: 7,       // how tall the "mountain relief" of the face is
   },
