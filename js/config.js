@@ -29,12 +29,13 @@ export const site = {
     kicker: { en: 'Hello —', mn: 'Сайн байна уу —' },
     title: { en: "I'm Tugsbileg.", mn: 'Би Төгсбилэг.' },
     text: {
+      // резюмегийн «Товч танилцуулга»-аас товчилсон
       en:
-        'I build web and mobile products end to end, from the database and API to the screen people touch. ' +
-        'Every project is a climb: start on solid ground, then keep going until the view opens up.',
+        'Full-stack developer who has built a multi-tenant SaaS platform for small gyms and a complete e-commerce store with payments and inventory tracking. ' +
+        'Before that, two years as a data analyst: digitizing and automating internal processes and leading a team of six.',
       mn:
-        'Өгөгдлийн сан, API-гаас эхлээд хүмүүсийн гартаа барьж хэрэглэх дэлгэц хүртэл веб болон мобайл бүтээгдэхүүнийг бүхэлд нь бүтээдэг. ' +
-        'Төсөл бүр нэг авиралт: бат бөх газраас эхэлж, үзэмж нээгдтэл урагшилсаар байна.',
+        'Жижиг фитнесүүдэд зориулсан multi-tenant SaaS платформ, төлбөр болон бараа хяналттай бүрэн E-Commerce дэлгүүр бүтээсэн Full-Stack хөгжүүлэгч. ' +
+        'Өмнө нь 2 жил дата шинжээчээр ажиллахдаа дотоод процессуудыг цахимжуулж, автоматжуулан, 6 хүний баг удирдсан.',
     },
   },
 
@@ -45,7 +46,7 @@ export const site = {
 
   // Булангийн жижиг уул — AI туслах. Зөвхөн энэ файл дахь мэдээлэл дээр тулгуурлаж хариулна.
   assistant: {
-    name: { en: 'Uuli', mn: 'Уули' },
+    name: { en: 'Uuli', mn: 'Уул' },
     greetings: {
       en: ['Hi! How can I help you?', 'Hello from the mountains!'],
       mn: ['Сайн уу! Танд юугаар туслах вэ?', 'Уулсаас мэнд хүргэе!'],
@@ -57,10 +58,23 @@ export const site = {
     // Дээр байхгүй нэмэлт мэдээлэл (ур чадвар, сургууль, хэл, ажлын туршлага, хобби...).
     // Энд бичсэн зүйлийг л AI мэднэ — бичээгүй зүйлийг "мэдэхгүй" гэж хариулна.
     facts: [
-      'Builds full products end to end: database, API, web and mobile apps.',
-      'Works mostly with TypeScript, Next.js, React Native (Expo), Supabase/PostgreSQL and Firebase.',
-      'Speaks Mongolian and English.',
-      'Full resume (Google Doc): https://docs.google.com/document/d/1mFcVVozH7vXmo3IJIZWRl1UbnF0bXkWBUwUgIFglab8/edit',
+      // хувийн
+      'Full name: Ganbat Tugsbileg (Ганбат Төгсбилэг). Phone: +976 8556 7784.',
+      'Born on 1 November 2003: a Scorpio, and born in the Year of the Sheep (Хонь жил) by the Mongolian calendar.',
+      'Loves playing football (хөлбөмбөг), the favourite thing to do away from the keyboard.',
+      'Languages: Mongolian (native), English (B2), Japanese (N5).',
+      // резюмегээс
+      'Headline: entry-level full-stack developer, focused on backend and automation.',
+      'Work: Full-Stack Developer at Lining Club, May 2026 – present. Put QPay payments (through Wire) live in production; designed admin / staff role-based access (RBAC) with Firebase custom claims, enforced at three levels: middleware, server-side token checks and Firestore / Storage security rules; shipped a fully Mongolian, mobile-first store on Vercel with MNT prices, guest checkout and order tracking.',
+      'Work: Data Analyst at Миний Дэлгүүр LLC, Sep 2023 – Sep 2025. Automated internal workflows with Microsoft Power Platform in Microsoft 365 and digitized paper processes, so requests got resolved faster; moved HR and admin paperwork (leave requests, business-trip orders) from paper to digital flows; analysed company data to support data-driven decisions; led a team of 6.',
+      'Work: Intern at Diverse Solution, 2022, on a web development project.',
+      'Fitness SaaS (Sep 2026 – present): dashboards for each role (platform admin, gym manager, trainer); recording a payment calculates the membership end date automatically; members about to expire or already expired show up on the manager dashboard, with tracking of who has been notified.',
+      'ClassPulse, the full classroom system (team of 5, Tugsbileg was the backend developer): detects whether a student is in their seat, dozing, looking at the board or using a phone; built on Cloudflare Workers, D1, R2 and Pages; real-time alerts to the teacher and a participation percentage for every student at the end of the day; AI runs locally in the browser so video never leaves the classroom, and students are told apart by seat map, not face recognition; tested on a ceiling UniFi Protect 360° camera; wrote the technical design doc (requirements, API spec, ERD, architecture).',
+      'NomadX / LUMINA (team of 3, Tugsbileg was team lead): customers find salons and independent artists on a map, book, pay a deposit and pay the rest after the service; AI beauty advisor, in-app chat, booking calendar, artist and salon portals and a web admin panel.',
+      'Other program projects: a real-time GPS tracking proof of concept for an at-home nail service (Socket.IO, Leaflet), a quiz app and a food delivery web app, each with its own technical design document.',
+      'Skills — languages: TypeScript, JavaScript, Python, SQL, HTML/CSS. Frameworks: Next.js (App Router), React, Expo / React Native, Hono, Tailwind CSS, shadcn/ui, Zustand, React Hook Form, Zod. Backend and cloud: Supabase, Firebase (Firestore, Auth, Storage, security rules), Cloudflare (Workers, D1, R2, Pages), Vercel, REST APIs, webhooks, WebSocket. Integrations: QPay through Wire, Meta Messenger API, Claude API, TensorFlow.js, MediaPipe. Automation and data: Microsoft Power Platform, Microsoft 365, Excel, SQL. Practices: technical design docs, RBAC, idempotent payment flows, Git / GitHub, AI-assisted development (Claude Code).',
+      'Education: New Mongolia Technology College (Шинэ Монгол Технологийн Коллеж), electrical engineering, Sep 2018 – Jun 2023, graduated. Pinecone Academy Software Engineering Program, an intensive project-based program, March 2026 – present, currently studying.',
+      'Full resume (Google Doc): https://docs.google.com/document/d/1mFcVVozH7vXmo3IJIZWRl1UbnF0bXkWBUwUgIFglab8/edit?usp=sharing',
     ],
   },
 

@@ -6,6 +6,7 @@ import { createPath, createPanels, layoutPanels, createTrail } from './journey.j
 import { createCursorFX } from './cursor.js';
 import { createBuddy } from './buddy.js';
 import { lang, setLang, onLang, pick, t, firstName } from './i18n.js';
+import { scramble } from './scramble.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -43,7 +44,10 @@ $$('.theme-toggle').forEach((b) => b.addEventListener('click', () => setTheme(th
 // ───────────────────────── language ─────────────────────────
 $$('[data-lang-set]').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.langSet)));
 $$('[data-lang-toggle]').forEach((b) => b.addEventListener('click', () => setLang(lang === 'mn' ? 'en' : 'mn')));
-onLang(fillText);
+onLang(() => {
+  fillText();
+  scramble($$('#loader, .hud, .rail, .scroll-hint, #story .block.is-active'));
+});
 
 // ───────────────────────── content ─────────────────────────
 function lines(arr) {

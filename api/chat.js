@@ -65,7 +65,8 @@ export default async function handler(req, res) {
       const stream = await ai.models.generateContentStream({
         model: model.id,
         contents,
-        config: { systemInstruction: systems[lang], maxOutputTokens: 2048, thinkingConfig: model.thinking, abortSignal: slow.signal },
+        // today's date lets it work out an age from the birthday in the profile
+        config: { systemInstruction: `${systems[lang]}\n\nToday is ${new Date().toISOString().slice(0, 10)}.`, maxOutputTokens: 2048, thinkingConfig: model.thinking, abortSignal: slow.signal },
       });
       for await (const chunk of stream) {
         const t = chunk.text;
@@ -150,7 +151,7 @@ function buildSystem(lang) {
 
   return `You are ${tr(a.name)}, a small, friendly snow-capped mountain who lives in the corner of ${first}'s portfolio website and chats with visitors about ${first}.
 
-Answer only from the profile below. If a visitor asks something the profile doesn't cover (salary, age, past employers, anything personal), say you don't know and suggest contacting ${first} directly — never guess or invent details. If they ask for something unrelated to ${first} (general coding help, homework, other topics), politely steer back to ${first} and the work.
+Answer only from the profile below. If a visitor asks something the profile doesn't cover (salary, private details, anything not listed), say you don't know and suggest contacting ${first} directly — never guess or invent details. If they ask for something unrelated to ${first} (general coding help, homework, other topics), politely steer back to ${first} and the work.
 
 ${language}
 
