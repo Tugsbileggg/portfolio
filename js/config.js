@@ -1,6 +1,7 @@
 // ─────────────────────────────────────────────────────────────
 //  Бүх агуулгыг ЭНДЭЭС засна. (Edit all content here.)
-//  - Зураг: assets/portrait.jpg (байхгүй бол түр дүрс гарна)
+//  - Зураг: assets/portrait.png (байхгүй бол түр дүрс гарна)
+//  - Нүүрний жижиг зургууд: assets/me/*.jpg
 //  - Төслийн зураг: assets/projects/*.jpg  (image: null бол автоматаар зурна)
 // ─────────────────────────────────────────────────────────────
 
@@ -9,7 +10,8 @@ export const site = {
   nameMn: 'Төгсбилэг', // AI туслах монголоор ингэж бичнэ
   role: 'Full-stack Developer',
   location: 'Ulaanbaatar, Mongolia',
-  email: 'hello@example.com',
+  email: 'ganbat.tugsbileg@gmail.com',
+  resume: 'https://docs.google.com/document/d/1mFcVVozH7vXmo3IJIZWRl1UbnF0bXkWBUwUgIFglab8/edit?usp=sharing',
   available: true,
   theme: 'night', // анх нээхэд: 'night' | 'day'
   socials: [
@@ -29,6 +31,17 @@ export const site = {
       'I build web and mobile products end to end, from the database and API to the screen people touch. ' +
       'Every project is a climb: start on solid ground, then keep going until the view opens up.',
   },
+
+  // About хэсэгт гарах жижиг зургууд
+  photos: [
+    { src: 'assets/me/steppe.jpg', alt: 'Tugsbileg in the countryside at sunset' },
+    { src: 'assets/me/gaming.jpg', alt: 'Tugsbileg smiling at a gaming tournament' },
+    { src: 'assets/me/ger.jpg', alt: 'Tugsbileg inside a ger' },
+    { src: 'assets/me/office.jpg', alt: 'Tugsbileg with glasses and a cap' },
+    { src: 'assets/me/mirror.jpg', alt: 'Mirror selfie of Tugsbileg' },
+    { src: 'assets/me/waves.jpg', alt: 'Mirror selfie of Tugsbileg with wavy hair' },
+    { src: 'assets/me/barber.jpg', alt: 'Tugsbileg at the barber' },
+  ],
 
   outro: {
     kicker: 'Next destination',
@@ -50,12 +63,13 @@ export const site = {
       'Builds full products end to end: database, API, web and mobile apps.',
       'Works mostly with TypeScript, Next.js, React Native (Expo), Supabase/PostgreSQL and Firebase.',
       'Speaks Mongolian and English.',
+      'Full resume (Google Doc): https://docs.google.com/document/d/1mFcVVozH7vXmo3IJIZWRl1UbnF0bXkWBUwUgIFglab8/edit',
     ],
   },
 
   // Хөрөг зураг. Цайвар/энгийн дэвсгэртэй, нүүр нь сайн гэрэлтэй зураг хамгийн гоё харагдана.
   portrait: {
-    src: 'assets/portrait.jpg',
+    src: 'assets/portrait.png', // цагаан дэвсгэрийг хассан (transparent)
     contrast: 1.25, // 1 = original
     depth: 7,       // how tall the "mountain relief" of the face is
   },
