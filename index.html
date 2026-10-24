@@ -32,19 +32,25 @@
       <p data-role></p>
     </div>
     <div class="loader-center">
-      <span class="loader-status">Charting the sky</span>
+      <span class="loader-status" data-i18n="loading">Charting the sky</span>
       <div class="loader-bar"><i></i></div>
-      <div class="theme-pick" role="group" aria-label="Choose your sky">
-        <button type="button" data-theme-set="night" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg><span>Night</span></button>
-        <button type="button" data-theme-set="day" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></svg><span>Day</span></button>
+      <div class="picks">
+        <div class="pick" role="group" aria-label="Language · Хэл">
+          <button type="button" data-lang-set="en" aria-pressed="true" lang="en"><span>English</span></button>
+          <button type="button" data-lang-set="mn" aria-pressed="false" lang="mn"><span>Монгол</span></button>
+        </div>
+        <div class="pick" role="group" aria-label="Choose your sky" data-i18n-aria="chooseSky">
+          <button type="button" data-theme-set="night" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg><span data-i18n="night">Night</span></button>
+          <button type="button" data-theme-set="day" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></svg><span data-i18n="day">Day</span></button>
+        </div>
       </div>
-      <button class="enter" type="button" disabled>Enter the sky <span aria-hidden="true">↘</span></button>
+      <button class="enter" type="button" disabled><span data-i18n="enter">Enter the sky</span> <span aria-hidden="true">↘</span></button>
     </div>
     <div class="loader-card" aria-hidden="true">
-      <div class="card-row"><span>Lat</span><b>47.9184° N</b></div>
-      <div class="card-row"><span>Lon</span><b>106.9177° E</b></div>
-      <div class="card-row"><span>Alt</span><b>1,350 M</b></div>
-      <div class="card-big">Made under the<br /><em>eternal blue sky</em></div>
+      <div class="card-row"><span data-i18n="lat">Lat</span><b>47.9184° <span data-i18n="north">N</span></b></div>
+      <div class="card-row"><span data-i18n="lon">Lon</span><b>106.9177° <span data-i18n="east">E</span></b></div>
+      <div class="card-row"><span data-i18n="alt">Alt</span><b>1,350 <span data-i18n="m">M</span></b></div>
+      <div class="card-big" data-i18n-html="madeUnder">Made under the<br /><em>eternal blue sky</em></div>
       <div class="card-ticks"></div>
     </div>
     <div class="loader-count" aria-hidden="true">000</div>
@@ -52,21 +58,22 @@
 
   <!-- HUD -->
   <header class="hud hud-top">
-    <a class="logo" href="#" data-goto="hero" aria-label="Back to start"><span data-initial></span></a>
+    <a class="logo" href="#" data-goto="hero" aria-label="Back to start" data-i18n-aria="home"><span data-initial></span></a>
     <nav class="nav">
-      <a href="#about" data-goto="about">About</a>
-      <a href="#projects" data-goto="projects">Projects</a>
-      <a href="#contact" data-goto="contact">Contact</a>
+      <a href="#about" data-goto="about" data-i18n="about">About</a>
+      <a href="#projects" data-goto="projects" data-i18n="projects">Projects</a>
+      <a href="#contact" data-goto="contact" data-i18n="contact">Contact</a>
     </nav>
+    <button class="lang-toggle" type="button" data-lang-toggle>МН</button>
     <button class="theme-toggle" type="button" aria-label="Switch to day sky"><span class="ico-moon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg></span><span class="ico-sun"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></svg></span></button>
-    <div class="status"><i></i><span>Available</span></div>
+    <div class="status"><i></i><span data-i18n="available">Available</span></div>
   </header>
 
   <footer class="hud hud-bottom">
     <div class="brand"><strong data-name></strong><span data-role></span></div>
     <div class="instruments" aria-hidden="true">
-      <span>ALT <b id="alt">1,350</b> M</span>
-      <span>HDG <b id="hdg">000</b>°</span>
+      <span><span data-i18n="alt">ALT</span> <b id="alt">1,350</b> <span data-i18n="m">M</span></span>
+      <span><span data-i18n="hdg">HDG</span> <b id="hdg">000</b>°</span>
       <span id="coords">47.9184°N 106.9177°E</span>
     </div>
     <div class="contact">
@@ -75,7 +82,7 @@
     </div>
   </footer>
 
-  <aside class="rail" aria-label="Journey">
+  <aside class="rail" aria-label="Journey" data-i18n-aria="journey">
     <div class="rail-track"><i class="rail-fill"></i></div>
     <ol></ol>
   </aside>
@@ -93,13 +100,13 @@
       <p class="kicker"></p>
       <h2 class="display"></h2>
       <p class="body"></p>
-      <p class="meta"><span>Based in</span> <b data-location></b></p>
+      <p class="meta"><span data-i18n="basedIn">Based in</span> <b data-location></b></p>
     </section>
 
     <section class="block block-work" data-block="work" id="projects">
-      <p class="kicker">Selected work</p>
-      <h2 class="display"><span class="line"><span><span class="count">00</span> projects</span></span></h2>
-      <p class="body">Follow the route. Each stop is something I built.</p>
+      <p class="kicker" data-i18n="selectedWork">Selected work</p>
+      <h2 class="display"><span class="line"><span><span class="count">00</span> <span data-i18n="projectsWord">projects</span></span></span></h2>
+      <p class="body" data-i18n="workBody">Follow the route. Each stop is something I built.</p>
     </section>
 
     <section class="block block-outro" data-block="outro" id="contact">
@@ -107,7 +114,7 @@
       <h2 class="display"></h2>
       <div class="reach">
         <a class="mail" data-email></a>
-        <a class="resume" data-resume target="_blank" rel="noopener">Resume <span aria-hidden="true">↗</span></a>
+        <a class="resume" data-resume target="_blank" rel="noopener"><span data-i18n="resume">Resume</span> <span aria-hidden="true">↗</span></a>
       </div>
       <div class="socials" data-socials></div>
     </section>
@@ -120,11 +127,11 @@
       <p class="tagline"></p>
       <p class="desc"></p>
       <dl class="facts">
-        <div><dt>Role</dt><dd class="role"></dd></div>
-        <div><dt>Stack</dt><dd class="stack"></dd></div>
+        <div><dt data-i18n="role">Role</dt><dd class="role"></dd></div>
+        <div><dt data-i18n="stack">Stack</dt><dd class="stack"></dd></div>
       </dl>
       <div class="links">
-        <a class="visit" target="_blank" rel="noopener">Visit site <span aria-hidden="true">↗</span></a>
+        <a class="visit" target="_blank" rel="noopener"><span data-i18n="visit">Visit site</span> <span aria-hidden="true">↗</span></a>
         <a class="repo" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
       </div>
     </section>
@@ -139,15 +146,15 @@
     <header class="chat-head">
       <span class="chat-avatar" aria-hidden="true"></span>
       <div><strong class="chat-name" id="chat-name"></strong><span class="chat-sub"></span></div>
-      <button class="chat-close" type="button" aria-label="Close chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <button class="chat-close" type="button" aria-label="Close chat" data-i18n-aria="closeChat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
     </header>
     <div class="chat-log" aria-live="polite"></div>
     <div class="chat-chips"></div>
     <form class="chat-form">
-      <textarea rows="1" maxlength="1500" aria-label="Your message"></textarea>
-      <button type="submit" aria-label="Send"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <textarea rows="1" maxlength="1500" aria-label="Your message" data-i18n-aria="yourMessage"></textarea>
+      <button type="submit" aria-label="Send" data-i18n-aria="send"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </form>
-    <p class="chat-note">AI answers from this portfolio only, and can be wrong.</p>
+    <p class="chat-note" data-i18n="chatNote">AI answers from this portfolio only, and can be wrong.</p>
   </section>
 
   <div id="scroll" aria-hidden="true"></div>
@@ -158,7 +165,7 @@
     <p data-role></p>
     <ol id="lite-list"></ol>
     <a data-email></a>
-    <a data-resume target="_blank" rel="noopener">Resume ↗</a>
+    <a data-resume target="_blank" rel="noopener"><span data-i18n="resume">Resume</span> ↗</a>
   </section>
 
   <script type="module" src="js/main.js"></script>

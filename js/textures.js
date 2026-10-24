@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { pick } from './i18n.js';
 
 // Seeded RNG so the world looks the same on every visit.
 export function rng(seed = 1) {
@@ -158,13 +159,13 @@ export function projectPlaceholder(p, index) {
   // copy
   g.fillStyle = '#fff';
   g.font = '800 132px "Inter Tight", sans-serif';
-  g.fillText(p.title.toUpperCase(), 90, 330);
+  g.fillText(pick(p.title).toUpperCase(), 90, 330);
   g.font = '500 34px "JetBrains Mono", monospace';
   g.fillStyle = 'rgba(255,255,255,0.6)';
   g.fillText(String(index + 1).padStart(2, '0') + ' — ' + p.year, 96, 200);
   g.font = '400 40px "Inter Tight", sans-serif';
   g.fillStyle = 'rgba(255,255,255,0.75)';
-  wrap(g, p.tagline, 96, 420, 760, 54);
+  wrap(g, pick(p.tagline), 96, 420, 760, 54);
 
   // fake buttons
   g.fillStyle = accent;

@@ -5,6 +5,7 @@ import { createSky, createStars, createClouds, skyColor, skyValue } from './sky.
 import { createPath, createPanels, layoutPanels, createTrail } from './journey.js';
 import { createCursorFX } from './cursor.js';
 import { createBuddy } from './buddy.js';
+import { lang, setLang, onLang, pick, t, firstName } from './i18n.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -31,7 +32,7 @@ function setTheme(name, { instant = false } = {}) {
   if (instant) theme.value = theme.target;
   document.documentElement.dataset.sky = day ? 'day' : 'night';
   $$('[data-theme-set]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themeSet === name)));
-  $$('.theme-toggle').forEach((b) => b.setAttribute('aria-label', day ? 'Switch to night sky' : 'Switch to day sky'));
+  $$('.theme-toggle').forEach((b) => b.setAttribute('aria-label', t(day ? 'toNight' : 'toDay')));
   document.querySelector('meta[name=theme-color]').content = day ? '#3c84dd' : '#03060f';
   try { localStorage.setItem('sky-theme', name); } catch (e) { /* private mode */ }
 }
@@ -39,33 +40,24 @@ setTheme(storedTheme() || site.theme || 'night', { instant: true });
 $$('[data-theme-set]').forEach((b) => b.addEventListener('click', () => setTheme(b.dataset.themeSet)));
 $$('.theme-toggle').forEach((b) => b.addEventListener('click', () => setTheme(theme.target ? 'night' : 'day')));
 
+// ───────────────────────── language ─────────────────────────
+$$('[data-lang-set]').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.langSet)));
+$$('[data-lang-toggle]').forEach((b) => b.addEventListener('click', () => setLang(lang === 'mn' ? 'en' : 'mn')));
+onLang(fillText);
+
 // ───────────────────────── content ─────────────────────────
 function lines(arr) {
   return arr.map((l, i) => `<span class="line" style="--i:${i}"><span>${l}</span></span>`).join('');
 }
 
 function fillContent() {
-  document.title = `${site.name[0]}${site.name.slice(1).toLowerCase()} — ${site.role}`;
-  $$('[data-name]').forEach((el) => (el.textContent = site.name));
-  $$('[data-role]').forEach((el) => (el.textContent = site.role));
-  $$('[data-initial]').forEach((el) => (el.textContent = site.name[0]));
   $$('[data-email]').forEach((el) => { el.textContent = site.email; el.href = `mailto:${site.email}`; });
   $$('[data-resume]').forEach((el) => { if (site.resume) el.href = site.resume; else el.remove(); });
-  $$('[data-location]').forEach((el) => (el.textContent = site.location));
   $$('[data-socials]').forEach((el) => {
     el.innerHTML = site.socials.map((s) => `<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join('');
   });
   if (!site.available) $('.status').classList.add('is-off');
-
-  $('.block-hero .kicker').textContent = site.hero.kicker;
-  $('.block-hero h2').innerHTML = lines(site.hero.title);
-  $('.scroll-hint span').textContent = site.hero.hint;
-  $('.block-about .kicker').textContent = site.about.kicker;
-  $('.block-about h2').innerHTML = lines([site.about.title]);
-  $('.block-about .body').textContent = site.about.text;
   $('.block-work .count').textContent = pad(projects.length);
-  $('.block-outro .kicker').textContent = site.outro.kicker;
-  $('.block-outro h2').innerHTML = lines(site.outro.title);
 
   const tpl = $('#project-tpl');
   projects.forEach((p, i) => {
@@ -74,10 +66,6 @@ function fillContent() {
     el.classList.add(i % 2 === 0 ? 'side-left' : 'side-right');
     $('.idx', el).textContent = `${pad(i + 1)} / ${pad(projects.length)}`;
     $('.year', el).textContent = p.year;
-    $('h2', el).innerHTML = lines([p.title]);
-    $('.tagline', el).textContent = p.tagline;
-    $('.desc', el).textContent = p.description;
-    $('.role', el).textContent = p.role;
     $('.stack', el).textContent = p.stack.join(' · ');
     const a = $('.visit', el);
     if (p.url && p.url !== '#') a.href = p.url; else a.remove();
@@ -85,9 +73,57 @@ function fillContent() {
     if (p.repo) repo.href = p.repo; else repo.remove();
     $('.block-outro').before(el);
   });
+  fillText();
+}
+
+// everything worded — runs again whenever the language changes
+function fillText() {
+  const name = pick(site.name), role = pick(site.role);
+  document.documentElement.lang = lang;
+  document.documentElement.dataset.lang = lang;
+  document.title = `${firstName()} — ${role}`;
+  $$('[data-name]').forEach((el) => (el.textContent = name));
+  $$('[data-role]').forEach((el) => (el.textContent = role));
+  $$('[data-initial]').forEach((el) => (el.textContent = name[0]));
+  $$('[data-location]').forEach((el) => (el.textContent = pick(site.location)));
+  $$('[data-i18n]').forEach((el) => (el.textContent = t(el.dataset.i18n)));
+  $$('[data-i18n-html]').forEach((el) => (el.innerHTML = t(el.dataset.i18nHtml)));
+  $$('[data-i18n-aria]').forEach((el) => el.setAttribute('aria-label', t(el.dataset.i18nAria)));
+  $$('.theme-toggle').forEach((b) => b.setAttribute('aria-label', t(theme.target ? 'toNight' : 'toDay')));
+  $$('[data-lang-set]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.langSet === lang)));
+  $$('[data-lang-toggle]').forEach((b) => {
+    const other = lang === 'mn' ? 'en' : 'mn';
+    b.textContent = other === 'mn' ? 'МН' : 'EN';
+    b.lang = other;
+    b.setAttribute('aria-label', other === 'mn' ? 'Монгол хэлээр үзэх' : 'View in English');
+  });
+
+  $('.block-hero .kicker').textContent = pick(site.hero.kicker);
+  $('.block-hero h2').innerHTML = lines(pick(site.hero.title));
+  $('.scroll-hint span').textContent = pick(site.hero.hint);
+  $('.block-about .kicker').textContent = pick(site.about.kicker);
+  $('.block-about h2').innerHTML = lines([pick(site.about.title)]);
+  $('.block-about .body').textContent = pick(site.about.text);
+  $('.block-outro .kicker').textContent = pick(site.outro.kicker);
+  $('.block-outro h2').innerHTML = lines(pick(site.outro.title));
+
+  $$('#story .block-project').forEach((el, i) => {
+    const p = projects[i];
+    $('h2', el).innerHTML = lines([pick(p.title)]);
+    $('.tagline', el).textContent = pick(p.tagline);
+    $('.desc', el).textContent = pick(p.description);
+    $('.role', el).textContent = pick(p.role);
+  });
+
+  $$('.rail li button').forEach((b, i) => {
+    const s = railStops[i];
+    const label = s.key ? t(s.key) : s.label;
+    b.firstElementChild.textContent = label;
+    b.setAttribute('aria-label', s.title ? pick(s.title) : label);
+  });
 
   $('#lite-list').innerHTML = projects
-    .map((p, i) => `<li><span>${pad(i + 1)}</span><div><h3>${p.url ? `<a href="${p.url}" target="_blank" rel="noopener">${p.title} ↗</a>` : p.title}</h3><p>${p.tagline}</p><small>${p.year} · ${p.stack.join(' · ')}</small></div></li>`)
+    .map((p, i) => `<li><span>${pad(i + 1)}</span><div><h3>${p.url ? `<a href="${p.url}" target="_blank" rel="noopener">${pick(p.title)} ↗</a>` : pick(p.title)}</h3><p>${pick(p.tagline)}</p><small>${p.year} · ${p.stack.join(' · ')}</small></div></li>`)
     .join('');
 }
 
@@ -125,10 +161,10 @@ const blocks = [
 ];
 
 const railStops = [
-  { label: 'Origin', p: 0 },
-  { label: 'Portrait', p: at('about', 0.3) },
+  { key: 'origin', p: 0 },
+  { key: 'portrait', p: at('about', 0.3) },
   ...projects.map((x, i) => ({ label: pad(i + 1), title: x.title, p: at(`project${i}`, 0.4) })),
-  { label: 'Contact', p: at('outro', 0.6) },
+  { key: 'contact', p: at('outro', 0.6) },
 ];
 const gotoTargets = {
   hero: 0,
@@ -142,8 +178,8 @@ const loader = { target: 0, shown: 0 };
 loader.done = new Promise((r) => (loader.resolve = r));
 
 async function boot() {
-  fillContent();
   buildRail();
+  fillContent();
 
   let renderer;
   try {
@@ -422,7 +458,7 @@ async function boot() {
     camera.getWorldDirection(fwd);
     altEl.textContent = Math.round(1350 + (8848 - 1350) * easeInOut(progress)).toLocaleString('en-US');
     hdgEl.textContent = pad(Math.round((Math.atan2(fwd.x, -fwd.z) * 180) / Math.PI + 360) % 360, 3);
-    coordEl.textContent = `${(47.9184 - camera.position.z * 0.0004).toFixed(4)}°N ${(106.9177 + camera.position.x * 0.0004).toFixed(4)}°E`;
+    coordEl.textContent = `${(47.9184 - camera.position.z * 0.0004).toFixed(4)}°${t('north')} ${(106.9177 + camera.position.x * 0.0004).toFixed(4)}°${t('east')}`;
     railFill.style.transform = `scaleY(${progress})`;
     let cur = 0;
     railStops.forEach((s, i) => { if (progress >= s.p - 0.004) cur = i; });
@@ -481,7 +517,7 @@ async function boot() {
 
 function buildRail() {
   $('.rail ol').innerHTML = railStops
-    .map((s, i) => `<li style="top:${(s.p * 100).toFixed(2)}%" data-i="${i}"><button type="button" aria-label="${s.title || s.label}"><span>${s.label}</span></button></li>`)
+    .map((s, i) => `<li style="top:${(s.p * 100).toFixed(2)}%" data-i="${i}"><button type="button"><span></span></button></li>`)
     .join('');
   $$('.rail li button').forEach((b) =>
     b.addEventListener('click', () => {
@@ -503,7 +539,12 @@ function tickLoader() {
     el.textContent = pad(v, 3);
     bar.style.transform = `scaleX(${loader.shown})`;
     if (loader.shown < 1) requestAnimationFrame(step);
-    else { $('.loader-status').textContent = 'Sky is clear'; loader.resolve(); }
+    else {
+      const status = $('.loader-status');
+      status.dataset.i18n = 'ready';
+      status.textContent = t('ready');
+      loader.resolve();
+    }
   };
   step();
 }

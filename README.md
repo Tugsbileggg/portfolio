@@ -17,6 +17,8 @@ npm run dev
 |---|---|
 | Нэр, мэргэжил, имэйл, сошиал, бүх текст | `js/config.js` → `site` |
 | Анх нээгдэх тэнгэр (шөнө/өдөр) | `js/config.js` → `site.theme` |
+| Англи / монгол текст | `js/config.js` дахь `{ en: '…', mn: '…' }` хосууд; товч, цэсний үгс `js/i18n.js` |
+| Анх нээгдэх хэл | `js/config.js` → `site.lang` (хөтөч нь монгол хэлтэй бол монголоор нээгдэнэ) |
 | Төслүүд | `js/config.js` → `projects` |
 | AI туслахын нэр, мэндчилгээ, нэмэлт мэдээлэл | `js/config.js` → `site.assistant` |
 | Хөрөг зураг | `assets/portrait.jpg` |

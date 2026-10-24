@@ -2,10 +2,10 @@
 // does a trick, then moves on. It drops hints for the section you're in; click it to chat with an
 // AI that only knows config.js.
 import { site, projects } from './config.js';
+import { lang, onLang, pick, t, firstName } from './i18n.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
-const first = site.name[0] + site.name.slice(1).toLowerCase();
 const STORE = 'buddy-chat';
 
 export function mountainSVG(id) {
@@ -50,10 +50,13 @@ export function createBuddy() {
   root.append(fx);
   $('.chat-avatar', panel).innerHTML = mountainSVG('bd-g2');
   const eyes = $('.bd-eyes', body);
-  $('.chat-name', panel).textContent = a.name;
-  $('.chat-sub', panel).textContent = `Ask me about ${first}`;
-  btn.setAttribute('aria-label', `Chat with ${a.name}, ${first}'s assistant`);
-  input.placeholder = `Ask anything about ${first}…`;
+  function labels() {
+    $('.chat-name', panel).textContent = pick(a.name);
+    $('.chat-sub', panel).textContent = t('chatSub', firstName());
+    btn.setAttribute('aria-label', t('chatWith', pick(a.name), firstName()));
+    input.placeholder = t('placeholder', firstName());
+  }
+  labels();
 
   // ───────── hints ─────────
   let hintTimer = 0, greet = 0, lastKey = '', open = false;
@@ -64,13 +67,14 @@ export function createBuddy() {
     clearTimeout(hintTimer);
     hintTimer = setTimeout(() => root.classList.remove('is-talking'), ms);
   }
+  const greeting = () => { const g = pick(a.greetings); return g[greet++ % g.length]; };
   const hintFor = (key) => {
-    if (key === 'hero') return a.greetings[greet++ % a.greetings.length];
-    if (key === 'about') return `Curious about ${first}? Ask me!`;
-    if (key === 'work') return 'Want a quick tour of the projects?';
-    if (key === 'outro') return 'Want to work together? I can help.';
+    if (key === 'hero') return greeting();
+    if (key === 'about') return t('hintAbout', firstName());
+    if (key === 'work') return t('hintWork');
+    if (key === 'outro') return t('hintOutro');
     const p = projects[+key.replace('project', '')];
-    return p ? `Ask me about ${p.title}!` : null;
+    return p ? t('hintProject', pick(p.title)) : null;
   };
   const activeKey = () => $('#story .is-active')?.dataset.block || '';
 
@@ -90,12 +94,12 @@ export function createBuddy() {
   const entered = new MutationObserver(() => {
     if (document.body.classList.contains('is-loading')) return;
     entered.disconnect();
-    setTimeout(() => hint(a.greetings[greet++ % a.greetings.length], 6000), 1800);
+    setTimeout(() => hint(greeting(), 6000), 1800);
     restUntil = clock + 8; // say hello from the corner first, then start wandering
   });
   entered.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
-  root.addEventListener('pointerenter', () => { if (!open && !root.classList.contains('is-talking')) hint(a.greetings[greet++ % a.greetings.length], 3000); });
+  root.addEventListener('pointerenter', () => { if (!open && !root.classList.contains('is-talking')) hint(greeting(), 3000); });
 
   // ───────── roaming: walk somewhere, stay 3–5 s and do a trick, move on ─────────
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -168,7 +172,7 @@ export function createBuddy() {
     lastTrick = name;
     if (name === 'talk') {
       const p = projects[Math.floor(Math.random() * projects.length)];
-      const lines = [...a.greetings, hintFor(activeKey()), 'Psst… click me to chat!', `Ask me about ${p.title}!`].filter(Boolean);
+      const lines = [...pick(a.greetings), hintFor(activeKey()), t('psst'), t('hintProject', pick(p.title))].filter(Boolean);
       return hint(lines[Math.floor(Math.random() * lines.length)], 3800);
     }
     if (name === 'look') {
@@ -274,7 +278,7 @@ export function createBuddy() {
   }
   function render() {
     log.innerHTML = '';
-    log.append(bubbleEl({ role: 'assistant', content: `Hi, I'm ${a.name}! Ask me anything about ${first}: projects, skills, or how to get in touch. Монголоор ч асууж болно.` }));
+    log.append(bubbleEl({ role: 'assistant', content: t('welcome', pick(a.name), firstName()) }));
     msgs.forEach((m) => log.append(bubbleEl(m)));
     renderChips();
     log.scrollTop = log.scrollHeight;
@@ -282,7 +286,7 @@ export function createBuddy() {
   function renderChips() {
     const asked = msgs.some((m) => m.role === 'user');
     const p = projects[+(activeKey().match(/^project(\d+)$/)?.[1] ?? -1)];
-    const list = asked ? [] : [...(p ? [`Tell me about ${p.title}`] : []), ...a.suggestions];
+    const list = asked ? [] : [...(p ? [t('tellMe', pick(p.title))] : []), ...pick(a.suggestions)];
     chips.innerHTML = '';
     list.forEach((q) => {
       const b = document.createElement('button');
@@ -310,9 +314,9 @@ export function createBuddy() {
 
     try {
       const history = msgs.filter((m) => m !== reply && !m.error).map(({ role, content }) => ({ role, content }));
-      const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history }) });
+      const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history, lang }) });
       if (!res.ok || !res.body) {
-        reply.content = (await res.text().catch(() => '')) || 'Something went wrong. Please try again.';
+        reply.content = (await res.text().catch(() => '')) || t('error');
         reply.error = true;
       } else {
         const reader = res.body.getReader();
@@ -326,10 +330,10 @@ export function createBuddy() {
         }
       }
     } catch (e) {
-      reply.content = "I couldn't reach the server. Check your connection and try again.";
+      reply.content = t('offline');
       reply.error = true;
     }
-    if (!reply.content) { reply.content = 'Something went wrong. Please try again.'; reply.error = true; }
+    if (!reply.content) { reply.content = t('error'); reply.error = true; }
     el.className = bubbleEl(reply).className;
     el.innerHTML = format(reply.content);
     log.scrollTop = log.scrollHeight;
@@ -371,6 +375,7 @@ export function createBuddy() {
   bubble.addEventListener('click', () => setOpen(true));
   $('.chat-close', panel).addEventListener('click', () => setOpen(false));
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) setOpen(false); });
+  onLang(() => { labels(); if (open) render(); });
 
   // the page scroll drives the flight — don't let wheel/touch inside the panel move it
   panel.addEventListener('wheel', (e) => {
