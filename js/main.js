@@ -242,7 +242,8 @@ async function boot() {
   await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 2500))]);
   loader.target = 0.15;
 
-  const dpr = Math.min(window.devicePixelRatio, mobile ? 1.5 : 2);
+  // phones render near their native sharpness, so the portrait's small dots stay crisp
+  const dpr = Math.min(window.devicePixelRatio, mobile ? 2.5 : 2);
   renderer.setPixelRatio(dpr);
   renderer.setSize(innerWidth, innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -295,6 +296,9 @@ async function boot() {
     mountains.material.uniforms.uScale.value = scale;
     trail.material.uniforms.uScale.value = scale;
     stars.material.uniforms.uPR.value = renderer.getPixelRatio();
+    // the portrait is shrunk on narrow screens; shrink its dots with it so they don't pile into a glare
+    const mu = mountains.material.uniforms;
+    mu.uPortraitDot.value = narrow ? 0.18 / mu.uSize.value : 1;
     if (narrow) {
       mountains.scale.setScalar(0.62);
       mountains.position.set(0, 9, 0);

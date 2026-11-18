@@ -142,7 +142,7 @@ const vertex = /* glsl */ `
   attribute vec3 aColB;
   attribute vec4 aRand; // delay, size, phase, portrait edge mask (0 = not in the portrait)
   attribute float aLum;  // portrait luminance
-  uniform float uTime, uMorph, uDissolve, uScale, uSize, uDay;
+  uniform float uTime, uMorph, uDissolve, uScale, uSize, uPortraitDot, uDay;
   uniform vec2 uPointer;      // pointer in NDC
   uniform float uPointerOn, uAspect;
   varying vec3 vColor;
@@ -189,7 +189,7 @@ const vertex = /* glsl */ `
     mv.xy += dv / (sqrt(md2) + 1e-4) * pf * vDepth * 0.05;
     gl_Position = projectionMatrix * mv;
 
-    float size = uSize * mix(0.6 + aRand.y * 0.8, 0.85 + aRand.y * 0.3, t * isP); // even dots once assembled
+    float size = uSize * mix(0.6 + aRand.y * 0.8, (0.85 + aRand.y * 0.3) * uPortraitDot, t * isP); // even dots once assembled
     size *= mix(1.0, mix(0.75 + lumN * 0.6, 0.8 + (1.0 - aLum) * 0.5, uDay), t * isP);
     size *= 1.0 + pf * 0.9;
     gl_PointSize = clamp(size * uScale / vDepth, 1.0, 26.0);
@@ -232,7 +232,7 @@ const fragment = /* glsl */ `
 
 export async function createMountains({ mobile, portrait }) {
   const r = rng(42);
-  const gw = mobile ? 120 : 176;
+  const gw = 176; // portrait dots across; phones too, their screens are sharp enough
   const gh = Math.round(gw * 1.25);
   const targets = await samplePortrait(portrait, gw, gh);
   const count = Math.max(targets.length + 4000, mobile ? 30000 : 68000);
@@ -295,6 +295,7 @@ export async function createMountains({ mobile, portrait }) {
       uDissolve: { value: 0 },
       uScale: { value: 1 },
       uSize: { value: mobile ? 0.28 : 0.23 },
+      uPortraitDot: { value: 1 }, // dot size multiplier once assembled into the portrait
       uDay: { value: 0 },
       uPointer: { value: new THREE.Vector2(9, 9) },
       uPointerOn: { value: 0 },
