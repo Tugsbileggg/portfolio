@@ -69,6 +69,7 @@ export const site = {
       'Work: Full-Stack Developer at Lining Club, May 2026 – present. Put QPay payments (through Wire) live in production; designed admin / staff role-based access (RBAC) with Firebase custom claims, enforced at three levels: middleware, server-side token checks and Firestore / Storage security rules; shipped a fully Mongolian, mobile-first store on Vercel with MNT prices, guest checkout and order tracking.',
       'Work: Data Analyst at Миний Дэлгүүр LLC, Sep 2023 – Sep 2025. Automated internal workflows with Microsoft Power Platform in Microsoft 365 and digitized paper processes, so requests got resolved faster; moved HR and admin paperwork (leave requests, business-trip orders) from paper to digital flows; analysed company data to support data-driven decisions; led a team of 6.',
       'Work: Intern at Diverse Solution, 2022, on a web development project.',
+      'KUMA (Oct 2026 – present, a PineQuest team project at Pinecone Academy, Tugsbileg was a full-stack developer; web: https://kumalearn.online): a gamified study app for grades 6–12 with daily lessons, points, XP, streaks, a pixel bear avatar shop, an adventure map with boss fights and class leagues. Tugsbileg built the first working version (Expo app, Cloudflare Workers + Hono API, D1 schema, sign-up and login, Gemini question generation, tasks / XP / streaks, the avatar shop, and real-time duels with point escrow on Durable Objects over WebSocket), then duel invite codes, the offline mode, profile sharing and friends by QR code, class clans joined by code, a textbook library with Gemini OCR, and an admin dashboard.',
       'Fitness SaaS (Sep 2026 – present): dashboards for each role (platform admin, gym manager, trainer); recording a payment calculates the membership end date automatically; members about to expire or already expired show up on the manager dashboard, with tracking of who has been notified.',
       'ClassPulse, the full classroom system (team of 5, Tugsbileg was the backend developer): detects whether a student is in their seat, dozing, looking at the board or using a phone; built on Cloudflare Workers, D1, R2 and Pages; real-time alerts to the teacher and a participation percentage for every student at the end of the day; AI runs locally in the browser so video never leaves the classroom, and students are told apart by seat map, not face recognition; tested on a ceiling UniFi Protect 360° camera; wrote the technical design doc (requirements, API spec, ERD, architecture).',
       'NomadX / LUMINA (team of 3, Tugsbileg was team lead): customers find salons and independent artists on a map, book, pay a deposit and pay the rest after the service; AI beauty advisor, in-app chat, booking calendar, artist and salon portals and a web admin panel.',
@@ -88,6 +89,28 @@ export const site = {
 };
 
 export const projects = [
+  {
+    title: 'KUMA',
+    year: 2026,
+    tagline: {
+      en: 'A gamified study app for kids in grades 6–12',
+      mn: '6–12-р ангийн хүүхдүүдэд зориулсан gamified хичээлийн апп',
+    },
+    description: {
+      en:
+        'Kids finish short daily lessons to earn points and XP, keep a streak, dress up their pixel bear and climb an adventure map with boss fights, or stake points in real-time duels with classmates. ' +
+        'One Expo app for phones and the web, running on Cloudflare Workers, D1 and Durable Objects, with an AI bear tutor and an offline mode.',
+      mn:
+        'Хүүхдүүд өдөр бүр богино даалгавар хийж оноо, XP цуглуулан дараалал (streak)-аа хадгалж, pixel баавгайгаа хувцаслан boss-той адал явдлын газрын зургаар ахина, эсвэл ангийнхантайгаа бооцоотой real-time тулаан хийнэ. ' +
+        'Утас, вэбд зориулсан нэг Expo апп нь Cloudflare Workers, D1, Durable Objects дээр ажиллаж, AI баавгай багш, офлайн горимтой.',
+    },
+    role: { en: 'Full-stack Developer · Backend & Mobile', mn: 'Full-stack хөгжүүлэгч · Backend ба мобайл' },
+    stack: ['Expo · React Native', 'TypeScript', 'Cloudflare Workers · Hono', 'D1 · Durable Objects', 'WebSocket', 'Gemini AI'],
+    url: 'https://kumalearn.online',
+    repo: null, // private repo
+    image: 'assets/projects/kuma.jpg',
+    accent: '#7b5cf5',
+  },
   {
     title: 'Фитнес Хяналт',
     year: 2026,
