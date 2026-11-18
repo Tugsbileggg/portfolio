@@ -177,6 +177,50 @@ const gotoTargets = {
   contact: 1,
 };
 
+// Where the flight comes to rest. One wheel flick, swipe or key press moves exactly one stop.
+const navStops = [
+  0, // hero
+  at('about', 0.3), // portrait + about
+  ph.travel0.start, // "Selected work"
+  ...projects.map((_, i) => at(`project${i}`, 0.4)),
+  1, // contact, sunrise
+];
+
+// Flight time goes where the camera moves: phases that hold still count for little,
+// so a flight between two stops is spent flying, not idling inside a still phase.
+const warpPts = [];
+{
+  let w = 0;
+  for (const x of phases) {
+    const still = x.name === 'hero' || x.name === 'about' || x.name.startsWith('project');
+    warpPts.push([x.start, w]);
+    w += (x.end - x.start) * (still ? 0.2 : 1);
+  }
+  warpPts.push([1, w]);
+}
+function mapWarp(v, from, to) {
+  for (let i = 1; i < warpPts.length; i++) {
+    const a = warpPts[i - 1], b = warpPts[i];
+    if (v <= b[from] || i === warpPts.length - 1) return a[to] + (b[to] - a[to]) * clamp01((v - a[from]) / (b[from] - a[from] || 1));
+  }
+}
+const warp = (p) => mapWarp(p, 0, 1);
+const unwarp = (w) => mapWarp(w, 1, 0);
+const nearestStop = (p) => navStops.reduce((best, s) => (Math.abs(warp(s) - warp(p)) < Math.abs(warp(best) - warp(p)) ? s : best));
+
+// critically damped spring (SmoothDamp): eases out of rest, keeps its speed when retargeted mid-flight
+function spring(cur, goal, vel, smoothTime, dt) {
+  const omega = 2 / smoothTime, x = omega * dt;
+  const k = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+  const change = cur - goal;
+  const temp = (vel + omega * change) * dt;
+  let v = (vel - omega * temp) * k;
+  let out = goal + (change + temp) * k;
+  if ((goal - cur > 0) === (out > goal) || (Math.abs(out - goal) < 2e-5 && Math.abs(v) < 2e-4)) { out = goal; v = 0; }
+  return [out, v];
+}
+let goTo = (p) => window.scrollTo({ top: p * (document.documentElement.scrollHeight - innerHeight), behavior: 'smooth' });
+
 // ───────────────────────── boot ─────────────────────────
 const loader = { target: 0, shown: 0 };
 loader.done = new Promise((r) => (loader.resolve = r));
@@ -348,6 +392,10 @@ async function boot() {
   // ── frame loop
   let progress = 0;
   let entered = false, intro = 0;
+  // nav: the stop being flown to. free = the page was scrolled some other way (scrollbar, find in page)
+  const nav = { target: 0, w: 0, v: 0, free: false };
+  let ownScrollY = 0, settleTimer = 0;
+  const scrollMax = () => document.documentElement.scrollHeight - innerHeight;
   let lastBlocks = '';
   const fwd = new V3();
   const tmpV2 = new THREE.Vector2();
@@ -359,10 +407,18 @@ async function boot() {
     const rawDt = clock.getDelta();
     const dt = Math.min(rawDt, 0.05);
     const time = clock.elapsedTime;
-    const max = document.documentElement.scrollHeight - innerHeight;
-    const target = max > 0 ? clamp01(scrollY / max) : 0;
-    progress += (target - progress) * (1 - Math.exp(-rawDt * 4.5));
-    if (Math.abs(target - progress) < 1e-5) progress = target;
+    const max = scrollMax();
+    if (nav.free) {
+      const target = max > 0 ? clamp01(scrollY / max) : 0;
+      progress += (target - progress) * (1 - Math.exp(-rawDt * 4.5));
+      if (Math.abs(target - progress) < 1e-5) progress = target;
+    } else {
+      [nav.w, nav.v] = spring(nav.w, warp(nav.target), nav.v, 0.5, dt);
+      progress = unwarp(nav.w);
+      // keep the real scroll position in step, for the scrollbar and anything reading scrollY
+      const y = Math.round(progress * max);
+      if (max > 0 && Math.abs(scrollY - y) > 1) { ownScrollY = y; window.scrollTo({ top: y, behavior: 'instant' }); }
+    }
 
     computeState(progress);
 
@@ -488,17 +544,90 @@ async function boot() {
     setTimeout(() => $('#loader').remove(), 1600);
   };
 
+  // ── stops: wheel, swipe and keys move one stop at a time
+  function go(p) {
+    if (nav.free) { nav.free = false; nav.w = warp(progress); nav.v = 0; }
+    clearTimeout(settleTimer);
+    nav.target = clamp01(p);
+  }
+  goTo = (p) => go(nearestStop(p));
+  function step(dir) {
+    const from = nav.free ? progress : nav.target;
+    const next = dir > 0 ? navStops.find((s) => s > from + 1e-4) : navStops.findLast((s) => s < from - 1e-4);
+    if (next !== undefined) go(next);
+  }
+  const ownInput = (el) => el.closest?.('.chat, #loader'); // the chat scrolls itself
+
+  // One gesture = one step. Trackpad inertia keeps firing for a second or more, so the events of
+  // a gesture are spent once it has stepped; a pause, or a fresh push while inertia fades, starts the next.
+  const wheel = { last: 0, acc: 0, prev: 0, count: 0, spent: false, at: 0, timer: 0 };
+  const wheelStep = () => { wheel.spent = true; wheel.at = performance.now(); clearTimeout(wheel.timer); step(Math.sign(wheel.acc)); };
+  addEventListener('wheel', (e) => {
+    if (!entered || e.ctrlKey || ownInput(e.target)) return;
+    e.preventDefault();
+    const d = e.deltaY * (e.deltaMode === 1 ? 32 : e.deltaMode === 2 ? innerHeight : 1);
+    if (!d) return;
+    const now = e.timeStamp, mag = Math.abs(d); // when it happened, so a busy frame can't split a gesture
+    const fresh = now - wheel.last > 200 || Math.sign(d) !== Math.sign(wheel.acc)
+      || (wheel.spent && now - wheel.at > 300 && mag > 12 && mag > wheel.prev * 2);
+    if (fresh) { wheel.acc = 0; wheel.count = 0; wheel.spent = false; }
+    wheel.last = now; wheel.prev = mag;
+    if (wheel.spent) return;
+    wheel.acc += d;
+    wheel.count++;
+    // a mouse wheel click (trackpads report wheelDeltaY = -3 × deltaY)
+    const notch = e.deltaMode !== 0 || (e.wheelDeltaY && e.wheelDeltaY % 120 === 0 && e.wheelDeltaY !== -3 * e.deltaY);
+    if (notch || Math.abs(wheel.acc) >= 24) return wheelStep();
+    // a slow mouse wheel click can be a single small delta: count it once nothing follows
+    clearTimeout(wheel.timer);
+    wheel.timer = setTimeout(() => { if (!wheel.spent && wheel.count <= 2 && Math.abs(wheel.acc) >= 3) wheelStep(); }, 140);
+  }, { passive: false });
+
+  let touch = null;
+  addEventListener('touchstart', (e) => {
+    touch = entered && e.touches.length === 1 && !ownInput(e.target) ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
+  }, { passive: true });
+  addEventListener('touchmove', (e) => { if (touch && e.touches.length === 1) e.preventDefault(); }, { passive: false });
+  addEventListener('touchend', (e) => {
+    if (!touch) return;
+    const f = e.changedTouches[0], dx = f.clientX - touch.x, dy = touch.y - f.clientY;
+    touch = null;
+    if (Math.abs(dy) > 36 && Math.abs(dy) > Math.abs(dx)) step(Math.sign(dy));
+  });
+  addEventListener('touchcancel', () => { touch = null; });
+
+  addEventListener('keydown', (e) => {
+    if (!entered || e.defaultPrevented || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target.closest?.('input, textarea, select, [contenteditable], .chat')) return;
+    const k = e.key;
+    if (k === 'Home' || k === 'End') { e.preventDefault(); go(k === 'Home' ? 0 : 1); return; }
+    const dir = k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey) ? 1
+      : k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey) ? -1 : 0;
+    if (!dir || (k === ' ' && e.target.closest?.('button, a'))) return;
+    e.preventDefault();
+    step(dir);
+  });
+
+  // scrolled some other way (scrollbar drag, find in page…): follow along, then settle on the nearest stop
+  addEventListener('scroll', () => {
+    if (!entered || Math.abs(scrollY - ownScrollY) <= 2) return;
+    nav.free = true;
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(() => go(nearestStop(scrollY / Math.max(1, scrollMax()))), 180);
+  }, { passive: true });
+
   // ?debug → skip the loader and expose a jump(progress) helper for testing
   if (new URLSearchParams(location.search).has('debug')) {
     document.body.classList.add('debug');
     enter();
     window.__sky = {
       jump(p) {
-        window.scrollTo(0, p * (document.documentElement.scrollHeight - innerHeight));
+        nav.free = false; nav.target = p; nav.w = warp(p); nav.v = 0;
         progress = p; intro = 1;
         update();
         return phaseAt(p)[0].name;
       },
+      state: () => ({ progress, target: nav.target, free: nav.free, stop: navStops.indexOf(nav.target), stops: navStops.length }),
     };
   } else {
     await loader.done;
@@ -513,8 +642,7 @@ async function boot() {
   $$('[data-goto]').forEach((a) =>
     a.addEventListener('click', (e) => {
       e.preventDefault();
-      const max = document.documentElement.scrollHeight - innerHeight;
-      window.scrollTo({ top: gotoTargets[a.dataset.goto] * max, behavior: 'smooth' });
+      goTo(gotoTargets[a.dataset.goto]);
     }),
   );
 }
@@ -524,11 +652,7 @@ function buildRail() {
     .map((s, i) => `<li style="top:${(s.p * 100).toFixed(2)}%" data-i="${i}"><button type="button"><span></span></button></li>`)
     .join('');
   $$('.rail li button').forEach((b) =>
-    b.addEventListener('click', () => {
-      const s = railStops[+b.parentElement.dataset.i];
-      const max = document.documentElement.scrollHeight - innerHeight;
-      window.scrollTo({ top: s.p * max, behavior: 'smooth' });
-    }),
+    b.addEventListener('click', () => goTo(railStops[+b.parentElement.dataset.i].p)),
   );
 }
 
