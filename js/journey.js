@@ -101,7 +101,56 @@ const panelFragment = /* glsl */ `
   }
 `;
 
-export async function createPanels(projects) {
+// Muted, looping screen recording for a panel. Nothing downloads until the flight nears it.
+function projectVideo(src) {
+  const v = document.createElement('video');
+  v.muted = v.defaultMuted = true;
+  v.loop = true;
+  v.playsInline = true;
+  v.setAttribute('muted', '');
+  v.setAttribute('playsinline', '');
+  v.preload = 'none';
+  v.crossOrigin = 'anonymous';
+  v.disablePictureInPicture = true;
+  v.dataset.src = src;
+  return v;
+}
+
+// No autoplaying video for people who asked for less motion or less data: they keep the poster.
+const stillOnly = matchMedia('(prefers-reduced-motion: reduce)').matches || !!navigator.connection?.saveData;
+const allVideos = new Set();
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) allVideos.forEach((v) => v.pause());
+});
+
+// Called every frame: start downloading when the panel is next, play while it is on screen.
+// The poster (the video's first frame) stays up until the video is really playing.
+export function setPanelMedia(mesh, { load, play }) {
+  const m = mesh.userData.media;
+  if (!m || m.state === 'failed') return;
+  const v = m.video;
+  if (load && m.state === 'idle') {
+    m.state = 'loading';
+    v.addEventListener('playing', () => {
+      if (m.tex) return;
+      m.tex = new THREE.VideoTexture(v);
+      m.tex.colorSpace = THREE.SRGBColorSpace;
+      mesh.material.uniforms.uMap.value = m.tex;
+    }, { once: true });
+    v.addEventListener('error', () => { m.state = 'failed'; v.removeAttribute('src'); }, { once: true });
+    v.src = v.dataset.src;
+    v.preload = 'auto';
+    v.load();
+  }
+  if (m.state === 'idle') return;
+  if (play && v.paused && !m.starting && performance.now() > m.retryAt) {
+    m.starting = true;
+    // low-power mode may refuse to autoplay: the poster stays, and we ask again a little later
+    v.play().catch(() => { m.retryAt = performance.now() + 4000; }).finally(() => { m.starting = false; });
+  } else if (!play && !v.paused) v.pause();
+}
+
+export async function createPanels(projects, { small = false } = {}) {
   const W = 16, H = 10;
   const geo = bentPlane(W, H, 20);
   const panels = await Promise.all(
@@ -134,6 +183,12 @@ export async function createPanels(projects) {
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.userData = { index: i, url: p.url, hover: 0, tilt: new THREE.Vector2(), baseQuat: new THREE.Quaternion() };
+      const src = small && p.videoSmall ? p.videoSmall : p.video;
+      if (src && !stillOnly) {
+        const video = projectVideo(src);
+        allVideos.add(video);
+        mesh.userData.media = { video, tex: null, state: 'idle', starting: false, retryAt: 0 };
+      }
       return mesh;
     }),
   );

@@ -2,6 +2,8 @@
 //  Бүх агуулгыг ЭНДЭЭС засна. (Edit all content here.)
 //  - Зураг: assets/portrait.png (байхгүй бол түр дүрс гарна)
 //  - Төслийн зураг: assets/projects/*.jpg  (image: null бол автоматаар зурна)
+//  - Төслийн бичлэг: assets/projects/*.mp4 — дуугүй, давталттай, 16:10 (1600×1000);
+//    videoSmall нь утсанд зориулсан жижиг хувилбар (960×600). Бичлэггүй бол зураг л харагдана.
 //  - { en: '…', mn: '…' } хос = англи / монгол хувилбар. Сайтын хэлийг
 //    орох хэсэгт сонгоно (товч, цэсний үгс js/i18n.js дотор бий).
 // ─────────────────────────────────────────────────────────────
@@ -108,7 +110,9 @@ export const projects = [
     stack: ['Expo · React Native', 'TypeScript', 'Cloudflare Workers · Hono', 'D1 · Durable Objects', 'WebSocket', 'Gemini AI'],
     url: 'https://kumalearn.online',
     repo: null, // private repo
-    image: 'assets/projects/kuma.jpg',
+    image: 'assets/projects/kuma.jpg', // бичлэгийн эхний кадр (poster)
+    video: 'assets/projects/kuma.mp4',
+    videoSmall: 'assets/projects/kuma-sm.mp4', // утсанд
     accent: '#7b5cf5',
   },
   {
@@ -130,7 +134,9 @@ export const projects = [
     stack: ['Next.js 16', 'TypeScript', 'Supabase', 'PostgreSQL · RLS', 'Tailwind · shadcn/ui', 'Leaflet'],
     url: 'https://fitness-pi-opal-62.vercel.app',
     repo: 'https://github.com/Tugsbileggg/fitness',
-    image: 'assets/projects/fitness.jpg',
+    image: 'assets/projects/fitness.jpg', // бичлэгийн эхний кадр (poster)
+    video: 'assets/projects/fitness.mp4',
+    videoSmall: 'assets/projects/fitness-sm.mp4', // утсанд
     accent: '#d4ff3a',
   },
   {
@@ -152,7 +158,9 @@ export const projects = [
     stack: ['Next.js 16', 'TypeScript', 'Tailwind CSS v4', 'Cloudflare Workers'],
     url: 'https://classpulse-eosin.vercel.app',
     repo: 'https://github.com/Tugsbileggg/ClassPulse',
-    image: 'assets/projects/classpulse.jpg',
+    image: 'assets/projects/classpulse.jpg', // бичлэгийн эхний кадр (poster)
+    video: 'assets/projects/classpulse.mp4',
+    videoSmall: 'assets/projects/classpulse-sm.mp4', // утсанд
     accent: '#3d7bff',
   },
   {
@@ -174,7 +182,9 @@ export const projects = [
     stack: ['React Native · Expo', 'Next.js', 'Supabase', 'PostgreSQL · RLS', 'Hono', 'Gemini AI'],
     url: 'https://frontend-pi-lyart-87.vercel.app',
     repo: 'https://github.com/Tugsbileggg/NomadX',
-    image: 'assets/projects/nomadx.jpg',
+    image: 'assets/projects/nomadx.jpg', // бичлэгийн эхний кадр (poster)
+    video: 'assets/projects/nomadx.mp4',
+    videoSmall: 'assets/projects/nomadx-sm.mp4', // утсанд
     accent: '#d48a96',
   },
   {
@@ -196,7 +206,9 @@ export const projects = [
     stack: ['Next.js 16', 'TypeScript', 'Firebase', 'Zustand', 'React Hook Form · Zod', 'QPay'],
     url: 'https://lining-club.vercel.app',
     repo: 'https://github.com/Tugsbileggg/lining-club',
-    image: 'assets/projects/lining-club.jpg',
+    image: 'assets/projects/lining-club.jpg', // бичлэгийн эхний кадр (poster)
+    video: 'assets/projects/lining-club.mp4',
+    videoSmall: 'assets/projects/lining-club-sm.mp4', // утсанд
     accent: '#ff4747',
   },
 ];

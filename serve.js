@@ -18,6 +18,8 @@ const types = {
   '.webp': 'image/webp',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
 };
 
 http
@@ -29,9 +31,20 @@ http
     let file = path.normalize(path.join(root, url));
     if (!file.startsWith(root)) return res.writeHead(403).end();
     if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');
+    const type = types[path.extname(file).toLowerCase()] || 'application/octet-stream';
+    // video needs byte ranges (Safari refuses to play without them)
+    const range = req.headers.range && /^bytes=(\d*)-(\d*)$/.exec(req.headers.range);
+    if (range && fs.existsSync(file)) {
+      const size = fs.statSync(file).size;
+      const start = range[1] ? +range[1] : Math.max(0, size - +range[2]);
+      const end = range[1] && range[2] ? Math.min(+range[2], size - 1) : size - 1;
+      if (start >= size || start > end) return res.writeHead(416, { 'Content-Range': `bytes */${size}` }).end();
+      res.writeHead(206, { 'Content-Type': type, 'Content-Range': `bytes ${start}-${end}/${size}`, 'Accept-Ranges': 'bytes', 'Content-Length': end - start + 1, 'Cache-Control': 'no-cache' });
+      return fs.createReadStream(file, { start, end }).pipe(res);
+    }
     fs.readFile(file, (err, data) => {
       if (err) return res.writeHead(404).end('Not found');
-      res.writeHead(200, { 'Content-Type': types[path.extname(file).toLowerCase()] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
+      res.writeHead(200, { 'Content-Type': type, 'Accept-Ranges': 'bytes', 'Cache-Control': 'no-cache' });
       res.end(data);
     });
   })

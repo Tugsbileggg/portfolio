@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { site, projects } from './config.js';
 import { createMountains } from './mountains.js';
 import { createSky, createStars, createClouds, skyColor, skyValue } from './sky.js';
-import { createPath, createPanels, layoutPanels, createTrail } from './journey.js';
+import { createPath, createPanels, layoutPanels, createTrail, setPanelMedia } from './journey.js';
 import { createCursorFX } from './cursor.js';
 import { createBuddy } from './buddy.js';
 import { lang, setLang, onLang, pick, t, firstName } from './i18n.js';
@@ -17,6 +17,8 @@ const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 const pad = (n, l = 2) => String(n).padStart(l, '0');
 
 const mobile = matchMedia('(max-width: 760px), (pointer: coarse)').matches;
+// phones and small windows show the panels small: the lighter recordings are enough
+const narrowScreen = () => Math.min(screen.width, screen.height) < 820 || innerWidth / innerHeight < 0.9;
 const V3 = THREE.Vector3;
 
 history.scrollRestoration = 'manual';
@@ -266,7 +268,7 @@ async function boot() {
   const { curve, uStart, uOutro } = createPath();
   const n = projects.length;
   const stops = projects.map((_, i) => uStart + ((i + 0.85) / (n + 0.3)) * (uOutro - uStart));
-  const panels = await createPanels(projects);
+  const panels = await createPanels(projects, { small: narrowScreen() });
   panels.forEach((m) => scene.add(m));
   layoutPanels(panels, curve, stops, innerWidth / innerHeight); // so clouds can keep clear of them
   loader.target = 0.85;
@@ -497,6 +499,11 @@ async function boot() {
       u.uTime.value = time;
       u.uFogColor.value.copy(scene.fog.color);
       m.visible = reveal > 0.001 && m.position.distanceToSquared(camera.position) < 600 * 600;
+      // the recording downloads while the flight heads for it and plays while it is in view
+      setPanelMedia(m, {
+        load: entered && progress >= ph.depart.start && (i === state.active || i === state.active + 1),
+        play: entered && m.visible && reveal > 0.15,
+      });
     });
 
     const tu = trail.material.uniforms;
